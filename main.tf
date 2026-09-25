@@ -46,9 +46,11 @@ resource "aws_instance" "jenkins" {
     # Install Jenkins
     install -m 0755 -d /etc/apt/keyrings
 
-    wget -O /etc/apt/keyrings/jenkins-keyring.asc \
-      https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    sudo mkdir -p /usr/share/keyrings
 
+sudo curl -fsSL \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key \
+  -o /usr/share/keyrings/jenkins-keyring.asc
     echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] \
       https://pkg.jenkins.io/debian-stable binary/" \
       > /etc/apt/sources.list.d/jenkins.list
@@ -59,13 +61,13 @@ resource "aws_instance" "jenkins" {
 
     chmod 644 /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
-      https://apt.releases.hashicorp.com $(. /etc/os-release && echo "$VERSION_CODENAME") main" \
-      > /etc/apt/sources.list.d/hashicorp.list
+   echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
+  | sudo tee /etc/apt/sources.list.d/jenkins.list
 
     # Install Jenkins and Terraform
-    apt-get update -y
-    apt-get install -y jenkins terraform
+    sudo apt update
+    sudo apt install -y fontconfig openjdk-21-jre
+    sudo apt install -y jenkins
 
     # Enable and start Jenkins
     systemctl enable jenkins
